@@ -1,0 +1,9 @@
+langchain
+langchain-openai
+langchain-community
+openai
+faiss-cpu
+python-dotenv
+flask
+sentence-transformers
+transformers

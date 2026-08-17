@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Celestia — Astrology Chat</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Animated starfield background -->
+  <canvas id="stars"></canvas>
+
+  <!-- ── ONBOARDING SCREEN ── -->
+  <div id="onboarding" class="screen active">
+    <div class="onboarding-card">
+      <div class="sigil">✦</div>
+      <h1 class="title">Celestia</h1>
+      <p class="subtitle">Your cosmic companion — shaped by the stars you were born under</p>
+      <div class="input-group">
+        <label for="dob-input">Enter your date of birth</label>
+        <input
+          type="text"
+          id="dob-input"
+          placeholder="e.g. April 5 or November 22"
+          autocomplete="off"
+        />
+      </div>
+      <button id="detect-btn" class="btn-primary">
+        <span class="btn-text">Reveal My Sign</span>
+        <span class="btn-loader hidden">Reading the stars…</span>
+      </button>
+      <p id="detect-error" class="error-msg hidden"></p>
+    </div>
+  </div>
+
+  <!-- ── SIGN REVEAL SCREEN ── -->
+  <div id="reveal" class="screen">
+    <div class="reveal-card">
+      <div id="reveal-symbol" class="reveal-symbol"></div>
+      <h2 id="reveal-sign" class="reveal-sign"></h2>
+      <p id="reveal-element" class="reveal-element"></p>
+      <p id="reveal-tagline" class="reveal-tagline"></p>
+
+      <!-- Confidence score display -->
+      <div class="confidence-wrap" id="confidence-wrap">
+        <span class="confidence-label">Match confidence</span>
+        <div class="confidence-bar">
+          <div class="confidence-fill" id="confidence-fill"></div>
+        </div>
+        <span class="confidence-pct" id="confidence-pct"></span>
+      </div>
+
+      <button id="start-chat-btn" class="btn-primary">Begin Your Reading →</button>
+    </div>
+  </div>
+
+  <!-- ── CHAT SCREEN ── -->
+  <div id="chat-screen" class="screen">
+    <header class="chat-header">
+      <div class="header-left">
+        <span id="header-symbol" class="header-symbol"></span>
+        <div>
+          <span class="header-title">Celestia</span>
+          <span id="header-sign" class="header-sign"></span>
+        </div>
+      </div>
+
+      <!-- Tab navigation -->
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="chat">💬 Chat</button>
+        <button class="tab-btn" data-tab="horoscope">🔮 Horoscope</button>
+        <button class="tab-btn" data-tab="compat">♾ Compatibility</button>
+      </nav>
+
+      <button id="reset-btn" class="reset-btn" title="Start over">↺</button>
+    </header>
+
+    <!-- ── TAB: Chat ── -->
+    <div id="tab-chat" class="tab-panel active">
+      <div id="messages" class="messages"></div>
+      <div class="input-bar">
+        <textarea
+          id="user-input"
+          placeholder="Ask the cosmos anything…"
+          rows="1"
+          autocomplete="off"
+        ></textarea>
+        <button id="send-btn" class="send-btn" aria-label="Send">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── TAB: Daily Horoscope ── -->
+    <div id="tab-horoscope" class="tab-panel hidden">
+      <div class="feature-panel">
+        <div class="feature-header">
+          <span class="feature-icon">🔮</span>
+          <h2 class="feature-title">Daily Horoscope</h2>
+          <p class="feature-sub" id="horoscope-date"></p>
+        </div>
+        <button id="get-horoscope-btn" class="btn-primary btn-feature">
+          <span class="btn-text">Generate Today's Reading ✦</span>
+          <span class="btn-loader hidden">Consulting the cosmos…</span>
+        </button>
+        <div id="horoscope-result" class="feature-result hidden"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: Compatibility ── -->
+    <div id="tab-compat" class="tab-panel hidden">
+      <div class="feature-panel">
+        <div class="feature-header">
+          <span class="feature-icon">♾</span>
+          <h2 class="feature-title">Compatibility Check</h2>
+          <p class="feature-sub">See how two signs connect</p>
+        </div>
+
+        <div class="compat-row">
+          <div class="compat-box">
+            <label class="compat-label">Your Sign</label>
+            <div class="compat-fixed-sign" id="compat-sign1">—</div>
+          </div>
+          <div class="compat-vs">vs</div>
+          <div class="compat-box">
+            <label class="compat-label">Compare With</label>
+            <select id="compat-sign2" class="compat-select">
+              <option value="">Choose a sign…</option>
+              <option>Aries</option><option>Taurus</option><option>Gemini</option>
+              <option>Cancer</option><option>Leo</option><option>Virgo</option>
+              <option>Libra</option><option>Scorpio</option><option>Sagittarius</option>
+              <option>Capricorn</option><option>Aquarius</option><option>Pisces</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="check-compat-btn" class="btn-primary btn-feature">
+          <span class="btn-text">Check Compatibility ✦</span>
+          <span class="btn-loader hidden">Aligning the stars…</span>
+        </button>
+        <div id="compat-result" class="feature-result hidden"></div>
+      </div>
+    </div>
+
+  </div><!-- end #chat-screen -->
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
