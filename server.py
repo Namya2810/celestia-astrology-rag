@@ -1,16 +1,16 @@
-"""
+﻿"""
 server.py
 ---------
-Flask backend for the Astrology Chatbot — Celestia.
+Flask backend for the Astrology Chatbot â€” Celestia.
 
 Endpoints:
-  GET  /                   — serves the chat UI
-  POST /detect             — takes a date of birth, returns the detected zodiac sign
-  POST /chat               — takes a message + zodiac, returns AI response
-  POST /compatibility      — takes two zodiac signs, returns compatibility analysis
-  POST /horoscope          — takes a zodiac sign, returns a daily horoscope
-  GET  /history            — returns session chat history
-  POST /clear              — clears the session
+  GET  /                   â€” serves the chat UI
+  POST /detect             â€” takes a date of birth, returns the detected zodiac sign
+  POST /chat               â€” takes a message + zodiac, returns AI response
+  POST /compatibility      â€” takes two zodiac signs, returns compatibility analysis
+  POST /horoscope          â€” takes a zodiac sign, returns a daily horoscope
+  GET  /history            â€” returns session chat history
+  POST /clear              â€” clears the session
 
 Run with:
     python server.py
@@ -36,11 +36,11 @@ app = Flask(__name__)
 # Secret key needed for Flask session (persistent memory across requests)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "celestia-secret-key-2024")
 
-# ── Similarity score threshold for fallback handling ──────────────────────
+# â”€â”€ Similarity score threshold for fallback handling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # If FAISS returns a distance score higher than this, the context is too weak
 SIMILARITY_THRESHOLD = 1.2
 
-# ── Zodiac personality tones ───────────────────────────────────────────────
+# â”€â”€ Zodiac personality tones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 ZODIAC_TONES = {
     "Aries":       "Bold, direct, and energetic. Short punchy sentences. Enthusiastic and action-oriented.",
     "Taurus":      "Calm, warm, and grounded. Patient tone. Appreciates beauty and comfort.",
@@ -56,7 +56,7 @@ ZODIAC_TONES = {
     "Pisces":      "Dreamy, compassionate, and poetic. Imaginative language. Deep empathy.",
 }
 
-# ── Load FAISS + embeddings once at startup ────────────────────────────────
+# â”€â”€ Load FAISS + embeddings once at startup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 print("Loading FAISS index and embedding model...")
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 vectorstore = FAISS.load_local(
@@ -68,16 +68,16 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 print("Ready.")
 
 
-# ── Helper: get LLM instance ───────────────────────────────────────────────
+# â”€â”€ Helper: get LLM instance â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def get_llm():
     return ChatOpenAI(
-        model="deepseek-chat",
-        base_url="https://api.deepseek.com/v1",
+        model="openai/gpt-oss-120b",
+        base_url="https://api.groq.com/openai/v1",
         temperature=0.5,
     )
 
 
-# ── Helper: extract month name from date string ────────────────────────────
+# â”€â”€ Helper: extract month name from date string â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def extract_month(date_input: str) -> str:
     months = [
         "January", "February", "March", "April", "May", "June",
@@ -89,11 +89,11 @@ def extract_month(date_input: str) -> str:
     return date_input.strip()
 
 
-# ── Helper: retrieve context with confidence score ─────────────────────────
+# â”€â”€ Helper: retrieve context with confidence score â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def retrieve_with_confidence(query: str):
     """
     Returns retrieved context text AND a confidence percentage.
-    Uses similarity_search_with_score — lower distance = better match.
+    Uses similarity_search_with_score â€” lower distance = better match.
     Distance is converted to a 0-100% confidence score for display.
     """
     results = vectorstore.similarity_search_with_score(query, k=3)
@@ -101,7 +101,7 @@ def retrieve_with_confidence(query: str):
     if not results:
         return "", 0, True  # context, confidence, is_fallback
 
-    # FAISS returns L2 distance — lower is better
+    # FAISS returns L2 distance â€” lower is better
     best_score = results[0][1]
 
     # Convert distance to confidence percentage
@@ -117,11 +117,11 @@ def retrieve_with_confidence(query: str):
     return context, confidence, is_fallback
 
 
-# ── Smart topic mapper ────────────────────────────────────────────────────
+# â”€â”€ Smart topic mapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # This is the key fix for low confidence scores.
 # When a user says something like "I am struggling with my exams",
 # we translate that into a zodiac-relevant retrieval query like
-# "Scorpio career strengths challenges work" — which actually matches
+# "Scorpio career strengths challenges work" â€” which actually matches
 # the zodiac_data.txt content and gets a much higher FAISS confidence score.
 
 TOPIC_MAP = {
@@ -179,7 +179,7 @@ TOPIC_MAP = {
 def map_message_to_zodiac_topic(message: str, zodiac: str) -> str:
     """
     Translate a user's freeform message into zodiac-relevant retrieval keywords.
-    e.g. "I am struggling with my exams" → "career strengths challenges work discipline"
+    e.g. "I am struggling with my exams" â†’ "career strengths challenges work discipline"
     Falls back to broad profile retrieval if no keywords match.
     """
     message_lower = message.lower()
@@ -195,11 +195,11 @@ def map_message_to_zodiac_topic(message: str, zodiac: str) -> str:
         words = list(dict.fromkeys(combined.split()))  # deduplicate, preserve order
         return " ".join(words[:10])  # cap at 10 words for clean retrieval
 
-    # No keyword matched — fall back to full profile retrieval
+    # No keyword matched â€” fall back to full profile retrieval
     return "traits strengths weaknesses life advice career love relationships"
 
 
-# ── Month+day → Zodiac lookup (used by detect_zodiac for high-confidence retrieval) ──
+# â”€â”€ Month+day â†’ Zodiac lookup (used by detect_zodiac for high-confidence retrieval) â”€â”€
 # Instead of asking FAISS "what sign is October 28?" (which scores ~35%),
 # we directly look up the sign from the date, then retrieve that sign's full profile.
 # This gets 85-95% confidence because we query exactly what's in zodiac_data.txt.
@@ -243,22 +243,22 @@ def parse_dob_to_month_day(dob: str):
 def get_zodiac_from_date(month: int, day: int) -> str:
     """Return the zodiac sign name for a given month and day."""
     for sign, (sm, sd), (em, ed) in ZODIAC_DATE_RANGES:
-        if sm <= em:  # normal range (e.g. Aries: Mar 21 – Apr 19)
+        if sm <= em:  # normal range (e.g. Aries: Mar 21 â€“ Apr 19)
             if (month == sm and day >= sd) or (month == em and day <= ed) or (sm < month < em):
                 return sign
-        else:  # wraps year-end (Capricorn: Dec 22 – Jan 19)
+        else:  # wraps year-end (Capricorn: Dec 22 â€“ Jan 19)
             if (month == sm and day >= sd) or (month == em and day <= ed):
                 return sign
     return None
 
 
-# ── Route: serve the chat UI ───────────────────────────────────────────────
+# â”€â”€ Route: serve the chat UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-# ── Route: detect zodiac from date of birth ────────────────────────────────
+# â”€â”€ Route: detect zodiac from date of birth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/detect", methods=["POST"])
 def detect_zodiac():
     data = request.get_json()
@@ -267,7 +267,7 @@ def detect_zodiac():
     if not dob:
         return jsonify({"error": "No date of birth provided"}), 400
 
-    # ── Step 1: Determine the zodiac sign directly from the date ──────────
+    # â”€â”€ Step 1: Determine the zodiac sign directly from the date â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # This replaces the old approach of asking FAISS "what sign is this date?"
     # which scored only ~35% because FAISS matched question text against fact text.
     month_num, day_num = parse_dob_to_month_day(dob)
@@ -280,7 +280,7 @@ def detect_zodiac():
     if not detected_sign:
         return jsonify({"error": "Could not determine zodiac sign from that date."}), 400
 
-    # ── Step 2: Now retrieve the full profile for THAT sign ────────────────
+    # â”€â”€ Step 2: Now retrieve the full profile for THAT sign â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Query is now sign-name based, which directly matches zodiac_data.txt entries
     # This is why confidence jumps from ~35% to 85-95%
     ctx_traits, conf_traits, _ = retrieve_with_confidence(
@@ -293,12 +293,12 @@ def detect_zodiac():
     context = f"{ctx_traits}\n\n{ctx_extra}"
     confidence = max(conf_traits, conf_extra)
 
-    # ── Step 3: Ask LLM to extract clean metadata from the profile ─────────
+    # â”€â”€ Step 3: Ask LLM to extract clean metadata from the profile â”€â”€â”€â”€â”€â”€â”€â”€â”€
     prompt = f"""You are given the zodiac profile for {detected_sign} below.
 Extract and return ONLY a JSON object in this exact format (no extra text, no markdown):
 {{"sign": "{detected_sign}", "symbol": "EmojiSymbol", "element": "ElementName", "tagline": "One vivid sentence capturing the essence of {detected_sign}."}}
 
-Use the actual emoji symbol for {detected_sign} (e.g. ♏ for Scorpio, ♈ for Aries).
+Use the actual emoji symbol for {detected_sign} (e.g. â™ for Scorpio, â™ˆ for Aries).
 
 Profile:
 {context}
@@ -310,12 +310,12 @@ Profile:
 
     match = re.search(r"\{.*\}", raw, re.DOTALL)
     if not match:
-        # Even if LLM fails to format, we still have the sign — build a fallback
+        # Even if LLM fails to format, we still have the sign â€” build a fallback
         return jsonify({
             "sign": detected_sign,
-            "symbol": "✦",
+            "symbol": "âœ¦",
             "element": "",
-            "tagline": f"{detected_sign} — your cosmic identity awaits.",
+            "tagline": f"{detected_sign} â€” your cosmic identity awaits.",
             "confidence": confidence
         })
 
@@ -330,7 +330,7 @@ Profile:
     return jsonify(zodiac_data)
 
 
-# ── Route: chat with zodiac personality context ────────────────────────────
+# â”€â”€ Route: chat with zodiac personality context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
@@ -350,7 +350,7 @@ def chat():
 
     tone = ZODIAC_TONES.get(zodiac, "Friendly and helpful astrology assistant.")
 
-    # ── Persistent session memory ──────────────────────────────────────────
+    # â”€â”€ Persistent session memory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Always prefer session history (server-side) over what frontend sends
     # This prevents the duplicate-answer bug where frontend sends stale history
     session_history = session.get("chat_history", [])
@@ -359,21 +359,21 @@ def chat():
     # If session is empty (first message), use what frontend sent
     # This handles the case where session was just cleared
 
-    # ── Smart topic mapping ────────────────────────────────────────────────
+    # â”€â”€ Smart topic mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # The core fix: map what the user SAYS to what zodiac data CONTAINS
-    # "I am struggling with my exams" → retrieve "Scorpio career strengths challenges"
-    # This is why confidence was only 51% — the raw message doesn't match zodiac text
+    # "I am struggling with my exams" â†’ retrieve "Scorpio career strengths challenges"
+    # This is why confidence was only 51% â€” the raw message doesn't match zodiac text
     topic_keywords = map_message_to_zodiac_topic(message, zodiac)
     retrieval_query = f"{zodiac} zodiac {topic_keywords}"
     context, confidence, is_fallback = retrieve_with_confidence(retrieval_query)
 
-    # ── Fallback: lower threshold since we now map topics smarter ─────────
+    # â”€â”€ Fallback: lower threshold since we now map topics smarter â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if is_fallback:
         # Even on fallback, still try a broad retrieval of the full sign profile
         retrieval_query = f"{zodiac} zodiac traits strengths weaknesses life advice"
         context, confidence, _ = retrieve_with_confidence(retrieval_query)
 
-    # ── Build multi-turn conversation for LLM ─────────────────────────────
+    # â”€â”€ Build multi-turn conversation for LLM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # Send messages in proper OpenAI multi-turn format so LLM truly sees history
     # This is better than flattening history into a string
     messages_for_llm = []
@@ -382,11 +382,11 @@ def chat():
     is_first_message = len(history) == 0
 
     first_msg_rule = "- This is the first message. Give a warm, brief response and ask ONE curious follow-up question to learn more about their situation."
-    followup_rule  = "- This is a follow-up message. You MUST reference what was said earlier. Do not repeat your previous answer — add new depth or a different angle."
+    followup_rule  = "- This is a follow-up message. You MUST reference what was said earlier. Do not repeat your previous answer â€” add new depth or a different angle."
     turn_rule      = first_msg_rule if is_first_message else followup_rule
 
-    # System message — human, conversational, asks follow-up questions
-    system_msg = f"""You are Celestia — a warm, caring friend who knows astrology deeply.
+    # System message â€” human, conversational, asks follow-up questions
+    system_msg = f"""You are Celestia â€” a warm, caring friend who knows astrology deeply.
 You are having a real conversation with someone whose zodiac sign is {zodiac}.
 
 Use this {zodiac} profile to personalise everything you say:
@@ -394,7 +394,7 @@ Use this {zodiac} profile to personalise everything you say:
 
 Personality style: {tone}
 
-── HOW TO SOUND HUMAN ──
+â”€â”€ HOW TO SOUND HUMAN â”€â”€
 - React to what the person ACTUALLY said first. Feel their emotion before giving advice.
 - Use natural language: "oh", "that makes sense", "honestly", "I get that", "you know what's interesting?"
 - Do NOT start with "{zodiac} is..." or recite zodiac traits like a textbook.
@@ -402,16 +402,16 @@ Personality style: {tone}
 - Instead, weave traits in naturally: "That intense focus you have? It's one of your biggest strengths here."
 - Use short sentences. Speak like a person, not a newsletter.
 
-── CONVERSATION FLOW ──
+â”€â”€ CONVERSATION FLOW â”€â”€
 {turn_rule}
 - After acknowledging the user's situation, connect ONE relevant {zodiac} trait to it specifically.
 - End almost every reply with ONE follow-up question that digs deeper into THEIR specific situation.
 - Make questions feel genuinely curious, not scripted. Examples by situation:
-    Exams/work stress → "Is it the pressure of the deadline or the actual material that's getting to you?"
-    Relationships → "Is this someone you've known for a while or someone new?"
-    Feeling lost → "When you imagine things going well — what does that actually look like for you?"
-    Fear/anxiety → "Is this fear about something specific that happened, or more of a general feeling?"
-    Motivation → "What's the thing that usually gets you going when you're stuck?"
+    Exams/work stress â†’ "Is it the pressure of the deadline or the actual material that's getting to you?"
+    Relationships â†’ "Is this someone you've known for a while or someone new?"
+    Feeling lost â†’ "When you imagine things going well â€” what does that actually look like for you?"
+    Fear/anxiety â†’ "Is this fear about something specific that happened, or more of a general feeling?"
+    Motivation â†’ "What's the thing that usually gets you going when you're stuck?"
 - If the user just answered YOUR previous question, respond warmly to their answer first before moving on.
 - NEVER ask two questions in one reply.
 - Keep total reply to 3-5 sentences including the question."""
@@ -431,7 +431,7 @@ Personality style: {tone}
     response = llm.invoke(messages_for_llm)
     reply = response.content.strip()
 
-    # ── Save updated history to session ────────────────────────────────────
+    # â”€â”€ Save updated history to session â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     updated_history = history + [
         {"role": "user",      "content": message},
         {"role": "assistant", "content": reply}
@@ -445,7 +445,7 @@ Personality style: {tone}
     })
 
 
-# ── Route: zodiac compatibility checker ───────────────────────────────────
+# â”€â”€ Route: zodiac compatibility checker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/compatibility", methods=["POST"])
 def compatibility():
     """
@@ -484,7 +484,7 @@ def compatibility():
     context1 = f"{ctx1_traits}\n\n{ctx1_love}"
     context2 = f"{ctx2_traits}\n\n{ctx2_love}"
 
-    # Confidence = best score across all 4 retrievals (not average — best match wins)
+    # Confidence = best score across all 4 retrievals (not average â€” best match wins)
     avg_confidence = max(conf1_love, conf1_traits, conf2_love, conf2_traits)
 
     prompt = f"""You are Celestia, a warm and insightful astrology guide.
@@ -497,7 +497,7 @@ Using ONLY the two zodiac profiles below, write a compatibility reading between 
 {sign2} Profile:
 {context2}
 
-Write the analysis like a knowledgeable friend explaining this to someone — warm, honest, specific.
+Write the analysis like a knowledgeable friend explaining this to someone â€” warm, honest, specific.
 Structure your reply as:
 
 1. What these two signs naturally share or connect on (1-2 sentences)
@@ -520,7 +520,7 @@ Do not make up anything not in the profiles. Keep total reply to 5-6 sentences."
     })
 
 
-# ── Route: daily horoscope generator ──────────────────────────────────────
+# â”€â”€ Route: daily horoscope generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/horoscope", methods=["POST"])
 def horoscope():
     """
@@ -536,7 +536,7 @@ def horoscope():
     today = date.today().strftime("%B %d, %Y")
 
     # Multiple targeted retrievals to hit specific sections in zodiac_data.txt
-    # This is why horoscope confidence was low — one generic query doesn't match well
+    # This is why horoscope confidence was low â€” one generic query doesn't match well
 
     # Query 1: daily-relevant emotional/mood sections
     ctx_mood, conf_mood, _ = retrieve_with_confidence(
@@ -572,8 +572,8 @@ Cover these four things naturally in flowing sentences (do NOT use bullet points
 
 Rules:
 - Sound warm and personal, not like a newspaper column
-- Do not start with "Today, {zodiac}..." — vary the opening
-- Use the ruling planet, element, lucky colors or numbers if relevant — they make it feel more real
+- Do not start with "Today, {zodiac}..." â€” vary the opening
+- Use the ruling planet, element, lucky colors or numbers if relevant â€” they make it feel more real
 - Keep it to 4-5 sentences total"""
 
     llm = get_llm()
@@ -587,7 +587,7 @@ Rules:
     })
 
 
-# ── Route: get session chat history ───────────────────────────────────────
+# â”€â”€ Route: get session chat history â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/history", methods=["GET"])
 def get_history():
     """Returns the current session's chat history and zodiac info."""
@@ -598,13 +598,40 @@ def get_history():
     })
 
 
-# ── Route: clear session ───────────────────────────────────────────────────
+# â”€â”€ Route: clear session â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @app.route("/clear", methods=["POST"])
 def clear_session():
     """Clears the session so user can start fresh with a new zodiac sign."""
     session.clear()
     return jsonify({"message": "Session cleared successfully"})
 
+
+# --- Route: multi-agent entry point ---
+@app.route("/agent", methods=["POST"])
+def agent_endpoint():
+    """
+    Routes the request through the LangGraph multi-agent pipeline in
+    agent_graph.py: a router agent classifies intent (chat / compatibility /
+    horoscope) and hands off to the matching specialist worker agent, which
+    performs its own FAISS retrieval and LLM generation.
+    """
+    from agent_graph import celestia_agent  # lazy import avoids circular import
+
+    data = request.get_json()
+    message = data.get("message", "").strip()
+    zodiac = data.get("zodiac", "").strip() or session.get("zodiac", "")
+    sign2 = data.get("sign2", "").strip()
+
+    if not message:
+        return jsonify({"error": "No message provided"}), 400
+
+    result = celestia_agent.invoke({"message": message, "zodiac": zodiac, "sign2": sign2})
+
+    return jsonify({
+        "intent": result.get("intent"),
+        "response": result.get("response"),
+        "confidence": result.get("confidence"),
+    })
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

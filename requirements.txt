@@ -1,4 +1,4 @@
-langchain
+﻿langchain
 langchain-openai
 langchain-community
 openai
@@ -7,3 +7,5 @@ python-dotenv
 flask
 sentence-transformers
 transformers
+langgraph
+langchain-huggingface
